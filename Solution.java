@@ -1,59 +1,86 @@
 import java.lang.*;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Solution {
     public static void main(String[] args) {
-        /*Student std = new Student(new Scanner(System.in).nextInt());
-        System.out.println(std);
-        std.insertionSort();
-        System.out.println(std);*/
+        //№1
+        Student std = new Student(new Scanner(System.in).nextInt());
 
-        int[] arr1 = new int[new Scanner(System.in).nextInt()];
-        for(int i = 0; i < arr1.length; i++) {arr1[i] = new Scanner(System.in).nextInt();}
-        int[] arr2 = new int[new Scanner(System.in).nextInt()];
-        for(int i = 0; i < arr2.length; i++) {arr2[i] = new Scanner(System.in).nextInt();}
+        //№2
+        SortingStudentsByGPA temp = new SortingStudentsByGPA(new Scanner(System.in).nextInt());
+        System.out.println(temp);
 
-        System.out.println(Arrays.toString(mergeSort(arr1, arr2, 0, arr1.length + arr2.length - 1)));
+        //№3
+        Task3 tmp = new Task3();
+    }
+}
 
-        //SortingStudentsByGPA tmp = new SortingStudentsByGPA(5);
-        //System.out.println(tmp);
 
+class Task3{
+    Task3(){
+        int[] arr1 = {3, 2, 1, 12,3, 12,31, 3,12, 3,123,123,123, 123,123,1, 23,12312,3,123, 12,3};
+        int[] arr2 = {7, 6, 56, 6, 12,3,1, 2,1, 23,123, 12,31, 23,3,3, 5};
+        int[] arr = new int[arr1.length + arr2.length];
+
+        System.arraycopy(arr1, 0, arr, 0, arr1.length);
+        System.arraycopy(arr2, 0, arr, arr1.length, arr2.length);
+
+        arr = mergeSort(arr);
+        System.out.println(Arrays.toString(arr));
+    }
+    public static int[] mergeSort(int[] array) {
+        int[] tmp;
+        int[] currentSrc = array;
+        int[] currentDest = new int[array.length];
+
+        int size = 1;
+        while (size < array.length) {
+            for (int i = 0; i < array.length; i += 2 * size) {
+                merge(currentSrc, i, currentSrc, i + size, currentDest, i, size);
+            }
+
+            tmp = currentSrc;
+            currentSrc = currentDest;
+            currentDest = tmp;
+
+            size = size * 2;
+
+            System.out.println(Arrays.toString(currentSrc));
+        }
+        return currentSrc;
     }
 
-    static int[] mergeSort(int[] arr1, int[] arr2, int left, int right){
-        int[] tmp = new int[arr1.length + arr2.length];
-        for(int i = 0; i < tmp.length; i++){
-            if(i - arr1.length <= -1){
-                tmp[i] = arr1[i];
+    private static void merge(int[] src1, int src1Start, int[] src2, int src2Start, int[] dest,
+                              int destStart, int size) {
+        int index1 = src1Start;
+        int index2 = src2Start;
+
+        int src1End = Math.min(src1Start + size, src1.length);
+        int src2End = Math.min(src2Start + size, src2.length);
+
+        if (src1Start + size > src1.length) {
+            for (int i = src1Start; i < src1End; i++) {
+                dest[i] = src1[i];
             }
-            else{tmp[i] = arr2[tmp.length - i - 1];}
+            return;
         }
-        // Выберем разделитель, т.е. разделим пополам входной массив
-        int delimiter = left + ((right - left) / 2) + 1;
-        // Выполним рекурсивно данную функцию для двух половинок (если сможем разбить(
-        if (delimiter > 0 && right > (left + 1)) {
-            mergeSort(tmp, new int[0],left, delimiter - 1);
-            mergeSort(tmp, new int[0],delimiter, right);
-        }
-        // Создаём временный массив с нужным размером
-        int[] buffer = new int[right - left + 1];
-        // Начиная от указанной левой границы идём по каждому элементу
-        int cursor = left;
-        for (int i = 0; i < buffer.length; i++) {
-            // Мы используем delimeter чтобы указывать на элемент из правой части
-            // Если delimeter > right, значит в правой части не осталось недобавленных элементов
-            if (delimiter > right || tmp[cursor] > tmp[delimiter]) {
-                buffer[i] = tmp[cursor];
-                cursor++;
+
+        int iterationCount = src1End - src1Start + src2End - src2Start;
+
+        for (int i = destStart; i < destStart + iterationCount; i++) {
+            if (index1 < src1End && (index2 >= src2End || src1[index1] < src2[index2])) {
+                dest[i] = src1[index1];
+                index1++;
             } else {
-                buffer[i] = tmp[delimiter];
-                delimiter++;
+                dest[i] = src2[index2];
+                index2++;
             }
         }
-        System.arraycopy(buffer, 0, tmp, left, buffer.length);
-        return tmp;
     }
+
+
 }
 
 class Student{
@@ -67,6 +94,8 @@ class Student{
         {
             iDnumber[i] = scan.nextInt();
         }
+        insertionSort();
+        System.out.println(Arrays.toString(iDnumber));
     };
 
 
@@ -99,7 +128,7 @@ class Student{
 };
 
 interface Comparator{
-    public void reverseQuickSort(int leftBorder, int rightBorder);
+    public void quickSort(float[] source, int leftBorder, int rightBorder);
 }
 
 class SortingStudentsByGPA implements Comparator{
@@ -113,29 +142,37 @@ class SortingStudentsByGPA implements Comparator{
         {
             array[i] = scan.nextFloat();
         }
-        reverseQuickSort(0, num - 1);
+        quickSort(this.array, 0, array.length - 1);
     };
+
     @Override
-    public void reverseQuickSort(int leftBorder, int rightBorder) {
+    public String toString() {
+        return "SortingStudentsByGPA{" +
+                "array=" + Arrays.toString(array) +
+                '}';
+    }
+
+    @Override
+    public void quickSort(float[] source, int leftBorder, int rightBorder) {
         int leftMarker = leftBorder;
         int rightMarker = rightBorder;
-        float pivot = array[(leftMarker + rightMarker) / 2];
+        float pivot = source[(leftMarker + rightMarker) / 2];
         do {
             // Двигаем левый маркер слева направо пока элемент меньше, чем pivot
-            while (array[leftMarker] > pivot) {
+            while (source[leftMarker] > pivot) {
                 leftMarker++;
             }
             // Двигаем правый маркер, пока элемент больше, чем pivot
-            while (array[rightMarker] < pivot) {
+            while (source[rightMarker] < pivot) {
                 rightMarker--;
             }
-            // Проверим, не нужно ли обменять местами элементы, на которые указывают маркеры
-            if (leftMarker >= rightMarker) {
+            // Проверим, не нужно обменять местами элементы, на которые указывают маркеры
+            if (leftMarker <= rightMarker) {
                 // Левый маркер будет меньше правого только если мы должны выполнить swap
-                if (leftMarker > rightMarker) {
-                    float tmp = array[leftMarker];
-                    array[leftMarker] = array[rightMarker];
-                    array[rightMarker] = tmp;
+                if (leftMarker < rightMarker) {
+                    float tmp = source[leftMarker];
+                    source[leftMarker] = source[rightMarker];
+                    source[rightMarker] = tmp;
                 }
                 // Сдвигаем маркеры, чтобы получить новые границы
                 leftMarker++;
@@ -145,17 +182,10 @@ class SortingStudentsByGPA implements Comparator{
 
         // Выполняем рекурсивно для частей
         if (leftMarker < rightBorder) {
-            reverseQuickSort(leftMarker, rightBorder);
+            quickSort(source, leftMarker, rightBorder);
         }
         if (leftBorder < rightMarker) {
-            reverseQuickSort(leftBorder, rightMarker);
+            quickSort(source, leftBorder, rightMarker);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "SortingStudentsByGPA{" +
-                "array=" + Arrays.toString(array) +
-                '}';
     }
 }
